@@ -1,0 +1,34 @@
+# Pre-commit hooks for metaflow-zero
+# Install: pip install pre-commit && pre-commit install
+#
+# These hooks enforce golden principles mechanically on every commit.
+# "In a human-first workflow, these rules might feel pedantic. With agents,
+# they become multipliers: once encoded, they apply everywhere at once."
+
+repos:
+  - repo: local
+    hooks:
+      - id: metaflow-lint
+        name: Metaflow Custom Linter
+        entry: python tools/lint_check.py
+        language: python
+        pass_filenames: false
+        always_run: true
+        description: "Enforce taste invariants: naming, file size, architecture, structured logging"
+
+      - id: structural-tests
+        name: Structural Architecture Tests
+        entry: bash -c 'PYTHONPATH=. python -m pytest test/structural/ -q --no-header'
+        language: system
+        pass_filenames: false
+        always_run: true
+        description: "Enforce layer dependencies, naming, provider pattern, agent legibility"
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=500']

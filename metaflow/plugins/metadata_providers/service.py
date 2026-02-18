@@ -9,6 +9,8 @@ import time
 import urllib.request
 import urllib.error
 
+from metaflow.util import to_bytes, to_unicode
+
 
 class ServiceMetadataProvider:
     """Metadata provider that communicates with the Metaflow metadata service."""
@@ -21,14 +23,14 @@ class ServiceMetadataProvider:
 
     def _request(self, method, path, data=None):
         url = "%s%s" % (self.service_url, path)
-        body = json.dumps(data).encode("utf-8") if data else None
+        body = to_bytes(json.dumps(data)) if data else None
         req = urllib.request.Request(
             url, data=body, method=method,
             headers={"Content-Type": "application/json"} if body else {},
         )
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
-                return json.loads(resp.read().decode("utf-8"))
+                return json.loads(to_unicode(resp.read()))
         except urllib.error.HTTPError as e:
             if e.code == 404:
                 return None

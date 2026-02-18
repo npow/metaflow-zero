@@ -9,6 +9,8 @@ import os
 import urllib.request
 import urllib.error
 
+from metaflow.util import to_bytes, to_unicode
+
 
 class ArgoEventsClient:
     """Client for managing Argo Events resources (sensors, event sources)."""
@@ -21,14 +23,14 @@ class ArgoEventsClient:
 
     def _request(self, method, path, data=None):
         url = "%s%s" % (self.server_url, path)
-        body = json.dumps(data).encode("utf-8") if data else None
+        body = to_bytes(json.dumps(data)) if data else None
         headers = {"Content-Type": "application/json"} if body else {}
         req = urllib.request.Request(url, data=body, method=method, headers=headers)
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
-                return json.loads(resp.read().decode("utf-8"))
+                return json.loads(to_unicode(resp.read()))
         except urllib.error.HTTPError as e:
-            error_body = e.read().decode("utf-8", errors="replace")
+            error_body = to_unicode(e.read())
             raise RuntimeError(
                 "Argo Events API error %d: %s" % (e.code, error_body)
             )

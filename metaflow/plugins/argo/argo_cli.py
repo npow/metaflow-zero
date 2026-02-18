@@ -41,13 +41,13 @@ def cmd_argo_workflows_create(flow_cls, flow_graph, **kwargs):
         except ImportError:
             with open(output_file, "w") as f:
                 json.dump(workflow, f, indent=2)
-        print("Argo Workflow written to %s" % output_file)
+        sys.stderr.write("Argo Workflow written to %s\n" % output_file)
     else:
         try:
             import yaml
-            print(yaml.dump(workflow, default_flow_style=False))
+            sys.stdout.write(yaml.dump(workflow, default_flow_style=False))
         except ImportError:
-            print(json.dumps(workflow, indent=2))
+            sys.stdout.write(json.dumps(workflow, indent=2) + "\n")
 
     return workflow
 
@@ -65,11 +65,7 @@ def cmd_argo_workflows_trigger(flow_cls, flow_graph, **kwargs):
 
     client = ArgoClient(server_url=server_url, token=token, namespace=namespace)
 
-    try:
-        result = client.submit_workflow(workflow)
-        wf_name = result.get("metadata", {}).get("name", "unknown")
-        print("Workflow submitted: %s" % wf_name)
-        return result
-    except Exception as e:
-        print("Failed to submit workflow: %s" % str(e), file=sys.stderr)
-        raise
+    result = client.submit_workflow(workflow)
+    wf_name = result.get("metadata", {}).get("name", "unknown")
+    sys.stderr.write("Workflow submitted: %s\n" % wf_name)
+    return result

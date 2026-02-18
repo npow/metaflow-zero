@@ -117,7 +117,8 @@ def execute_step_in_kubernetes(
     succeeded, logs = wait_for_k8s_job(job_name, namespace)
 
     if logs:
-        print(logs, file=sys.stderr)
+        sys.stderr.write(logs)
+        sys.stderr.write("\n")
 
     if not succeeded:
         raise KubernetesException(
